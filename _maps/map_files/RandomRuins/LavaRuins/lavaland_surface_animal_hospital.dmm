@@ -79,7 +79,7 @@
 /area/ruin/powered/animal_hospital)
 "al" = (
 /obj/structure/table/wood,
-/obj/item/toy/plushie/carpplushie,
+/obj/item/toy/carpplushie,
 /obj/effect/turf_decal/tile/blue{
 	dir = 4
 	},
@@ -1016,6 +1016,9 @@
 	},
 /turf/simulated/floor/plasteel/white,
 /area/ruin/powered/animal_hospital)
+"jA" = (
+/turf/simulated/floor/plating/asteroid/basalt/lava_land_surface,
+/area/lavaland/surface/outdoors)
 
 (1,1,1) = {"
 aa
@@ -1439,7 +1442,7 @@ aa
 "}
 (15,1,1) = {"
 ab
-ab
+jA
 bY
 ca
 ae
