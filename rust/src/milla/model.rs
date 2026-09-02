@@ -306,7 +306,6 @@ impl Tile {
             / TILE_VOLUME
     }
 
-    #[allow(clippy::needless_range_loop)]
     pub(crate) fn copy_from(&mut self, other: &Tile) {
         self.airtight_directions = other.airtight_directions;
         self.gases.copy_from(&other.gases);

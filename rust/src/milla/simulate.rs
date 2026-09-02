@@ -982,6 +982,7 @@ pub(crate) fn adjust_hotspot(tile: &mut Tile, thermal_energy_delta: f32) {
 
 // Yay, tests!
 #[cfg(test)]
+#[allow(unused_imports)]
 mod tests {
     use super::*;
 

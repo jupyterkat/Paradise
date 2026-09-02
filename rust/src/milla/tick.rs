@@ -109,6 +109,7 @@ pub(crate) fn tick_z_level(
 
 // Yay, tests!
 #[cfg(test)]
+#[allow(dead_code)]
 mod tests {
     use super::*;
     use crate::milla::constants::*;
