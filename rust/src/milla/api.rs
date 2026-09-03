@@ -7,10 +7,13 @@ use crate::milla::statics::*;
 use crate::milla::tick;
 use byondapi::global_call::call_global;
 use byondapi::map::byond_block;
+use byondapi::map::byond_locatexyz;
 use byondapi::map::byond_xyz;
+use byondapi::map::ByondXYZ;
 use byondapi::prelude::*;
 use eyre::eyre;
 use eyre::Result;
+use fxhash::FxHashSet;
 use std::env;
 use std::thread;
 use std::time::Instant;
@@ -792,6 +795,169 @@ fn milla_set_zlevel_frozen(
     let mut z_level = maybe_z_level.unwrap();
     z_level.frozen = frozen;
     Ok(ByondValue::null())
+}
+
+#[byondapi::bind]
+fn scrub_surround_turf(src: ByondValue, tile: ByondValue) -> eyre::Result<ByondValue> {
+    let (byond_x, byond_y, byond_z) = byond_xyz(&tile)?.coordinates();
+    let (x, y, z) = (byond_x as i32 - 1, byond_y as i32 - 1, byond_z as i32 - 1);
+    let tile = internal_get_tile(x, y, z)?;
+
+    let mut done_dir = FxHashSet::default();
+
+    for dir in (0u8..4u8).into_iter().filter(|item| {
+        !tile
+            .airtight_directions
+            .contains(AirtightDirections::from_bits_retain(*item))
+    }) {
+        let actual_turf = match dir {
+            0 => {
+                //NORTH
+                done_dir.insert((x, y + 1, z));
+                let adj = internal_get_tile(x, y + 1, z)?;
+
+                //NORTHEAST
+                if !adj.airtight_directions.contains(AirtightDirections::EAST)
+                    && done_dir.insert((x + 1, y + 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x + 1,
+                            byond_y + 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                //NORTHWEST
+                if !adj.airtight_directions.contains(AirtightDirections::WEST)
+                    && done_dir.insert((x - 1, y + 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x - 1,
+                            byond_y + 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                byond_locatexyz(ByondXYZ::with_coords((byond_x, byond_y + 1, byond_z)))?
+            }
+            1 => {
+                //EAST
+                done_dir.insert((x + 1, y, z));
+                let adj = internal_get_tile(x + 1, y, z)?;
+
+                //NORTHEAST
+                if !adj.airtight_directions.contains(AirtightDirections::NORTH)
+                    && done_dir.insert((x + 1, y + 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x + 1,
+                            byond_y + 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                //SOUTHEAST
+                if !adj.airtight_directions.contains(AirtightDirections::SOUTH)
+                    && done_dir.insert((x + 1, y - 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x + 1,
+                            byond_y - 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                byond_locatexyz(ByondXYZ::with_coords((byond_x + 1, byond_y, byond_z)))?
+            }
+            2 => {
+                //SOUTH
+                done_dir.insert((x, y - 1, z));
+                let adj = internal_get_tile(x, y - 1, z)?;
+
+                //SOUTHEAST
+                if !adj.airtight_directions.contains(AirtightDirections::EAST)
+                    && done_dir.insert((x + 1, y - 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x + 1,
+                            byond_y - 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                //SOUTHWEST
+                if !adj.airtight_directions.contains(AirtightDirections::WEST)
+                    && done_dir.insert((x - 1, y - 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x - 1,
+                            byond_y - 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                byond_locatexyz(ByondXYZ::with_coords((byond_x, byond_y - 1, byond_z)))?
+            }
+            3 => {
+                //WEST
+                done_dir.insert((x - 1, y, z));
+                let adj = internal_get_tile(x - 1, y, z)?;
+
+                //SOUTHWEST
+                if !adj.airtight_directions.contains(AirtightDirections::SOUTH)
+                    && done_dir.insert((x - 1, y - 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x - 1,
+                            byond_y - 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                //NORTHWEST
+                if !adj.airtight_directions.contains(AirtightDirections::NORTH)
+                    && done_dir.insert((x - 1, y + 1, z))
+                {
+                    src.call(
+                        "scrub",
+                        &[byond_locatexyz(ByondXYZ::with_coords((
+                            byond_x - 1,
+                            byond_y + 1,
+                            byond_z,
+                        )))?],
+                    )?;
+                }
+
+                byond_locatexyz(ByondXYZ::with_coords((byond_x - 1, byond_y, byond_z)))?
+            }
+            _ => panic!("lol, lmao even"),
+        };
+
+        src.call("scrub", &[actual_turf])?;
+    }
+
+    return Ok(true.into());
 }
 
 // Yay, tests!

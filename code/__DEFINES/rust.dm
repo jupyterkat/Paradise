@@ -132,6 +132,11 @@
 /proc/set_zlevel_freeze(z, bool_frozen)
 	return RUSTLIB_CALL(milla_set_zlevel_frozen, z, bool_frozen)
 
+/obj/machinery/atmospherics/unary/vent_scrubber/proc/scrub_surrounding_turfs(var/turf/simulated/tile)
+	if(!tile || !istype(tile))
+		return FALSE
+	return RUSTLIB_CALL(scrub_surround_turf, src, tile)
+
 // MARK: MapManip
 
 /proc/mapmanip_read_dmm(mapname)

@@ -132,7 +132,6 @@ impl GasSet {
             self.values[i] += other.values[i];
         }
     }
-    #[allow(dead_code)]
     pub(crate) fn clear(&mut self) {
         for i in 0..GAS_COUNT {
             self.values[i] = 0.0;

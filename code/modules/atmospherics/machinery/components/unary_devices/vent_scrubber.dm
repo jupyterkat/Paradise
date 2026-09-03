@@ -106,14 +106,16 @@
 			var/icon/frame = icon('icons/atmos/vent_scrubber.dmi', "frame")
 			underlays += frame
 
-
+/*
 /obj/machinery/atmospherics/unary/vent_scrubber/atmos_init()
 	..()
 	check_turfs()
 
+*/
+
 /obj/machinery/atmospherics/unary/vent_scrubber/process_atmos()
-	if(widenet)
-		check_turfs()
+	//if(widenet)
+	//	check_turfs()
 
 	if(stat & (NOPOWER|BROKEN))
 		return
@@ -131,10 +133,12 @@
 	if(!on)
 		return 0
 
-	scrub(loc)
 	if(widenet)
-		for(var/turf/simulated/tile in adjacent_turfs)
-			scrub(tile)
+		scrub_surrounding_turfs(loc)
+	else
+		scrub(loc)
+		//for(var/turf/simulated/tile in adjacent_turfs)
+		//	scrub(tile)
 
 //we populate a list of turfs with nonatmos-blocked cardinal turfs AND
 //	diagonal turfs that can share atmos with *both* of the cardinal turfs
